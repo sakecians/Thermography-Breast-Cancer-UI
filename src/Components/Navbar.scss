@@ -1,0 +1,12 @@
+.nav{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.nav--items{
+    a{
+        padding: 1rem;
+        text-decoration: underline;
+        color: #333333;
+    }
+}
