@@ -12,6 +12,12 @@ import IconButton from "@mui/material/IconButton";
 import PropTypes from "prop-types";
 import { GrClose } from 'react-icons/gr';
 import upload_img from './upload.jpg';
+import Popover from "@mui/material/Popover";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import { Typewriter } from "react-simple-typewriter";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -53,6 +59,27 @@ BootstrapDialogTitle.propTypes = {
 export default function Home() {
     const [selectedFile, setSelectedFile] = useState();
     const [preview, setPreview] = useState();
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [prediction, setPrediction] = useState(undefined);
+
+    const onClickPop = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+
+    const onClosePop = () => {
+      setAnchorEl(null);
+    };
+
+    const handlePredictions = () => {
+      if(preview) {
+        setPrediction(() => "It's normal don't worry :)");
+      } else {
+        setPrediction(() => "Please upload an image first");
+      }
+    };
+
+    const openPop = Boolean(anchorEl);
+    const id = openPop ? "simple-popover" : undefined;
 
     // create a preview as a side effect, whenever selected file is changed
     useEffect(() => {
@@ -85,16 +112,18 @@ export default function Home() {
     const handleClose = () => {
         setOpen(false);
     };
+
     return (
       <div class='container'>
         <Box pt={2} pr={8}>
           <Navbar />
         </Box>
-        <Box m={8} mt={12} style={{ width: "500px" }}>
+        <Box m={8} mt={12} style={{ width: "300px" }}>
           <Grid container direction='column' spacing={3}>
-            <Grid item md={4}>
+            <Grid item>
               <Typography
                 style={{
+                  fontFamily: "Montserrat, sans-serif",
                   fontSize: "2.8rem",
                   lineHeight: "3rem",
                   color: "#333333",
@@ -109,18 +138,48 @@ export default function Home() {
                   }}>
                   THERMOGRAPHY
                 </span>{" "}
-                OF BREAST CANCER
+                <Typewriter
+                  words={["OF BREAST CANCER"]}
+                  typeSpeed={70}
+                  deleteSpeed={50}
+                  delaySpeed={1000}
+                />
               </Typography>
             </Grid>
-            <Grid item md={4}>
-              <Typography style={{ fontSize: "1rem", color: "#333333" }}>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero
-                facere dicta fugit provident perferendis explicabo vitae
+            <Grid item>
+              <Typography
+                style={{
+                  fontFamily: "Montserrat, sans-serif",
+                  fontSize: "2.8rem",
+                  lineHeight: "3rem",
+                  color: "#333333",
+                }}>
+                USING{" "}
+                <span
+                  style={{
+                    fontFamily: "Montserrat, sans-serif",
+                    fontSize: "2.8rem",
+                    color: "#333333",
+                    fontWeight: 600,
+                  }}>
+                  <Typewriter
+                    words={["SVM", "CNN"]}
+                    loop={false}
+                    cursor
+                    cursorStyle='_'
+                    typeSpeed={100}
+                    deleteSpeed={50}
+                    delaySpeed={1000}
+                  />
+                </span>
               </Typography>
             </Grid>
-            <Grid item md={4}>
+            <Grid item>
               <Button
-                style={{ background: "#E15E82", borderRadius: "200px" }}
+                style={{
+                  fontFamily: "Lato, sans-serif",
+                  backgroundColor: "#333",
+                }}
                 onClick={handleClickOpen}
                 variant='contained'>
                 Detect for free
@@ -163,11 +222,41 @@ export default function Home() {
                 <input type='file' onChange={onSelectFile} hidden />
               </Button>
             </Grid>
+            <Box m={2} />
+            {prediction ? (
+              <Grid container justifyContent='center'>
+                <Typography>{prediction}</Typography>
+              </Grid>
+            ) : undefined}
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={handleClose}>
+            <Button autoFocus onClick={onClickPop}>
               Predict
             </Button>
+            <Popover
+              id={id}
+              open={openPop}
+              anchorEl={anchorEl}
+              onClose={onClosePop}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}>
+              <nav aria-label='secondary mailbox folders'>
+                <List>
+                  <ListItem disablePadding>
+                    <ListItemButton>
+                      <ListItemText onClick={handlePredictions} primary='CNN' />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton component='a' href='#simple-list'>
+                      <ListItemText onClick={handlePredictions} primary='SVM' />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </nav>
+            </Popover>
           </DialogActions>
         </BootstrapDialog>
       </div>
