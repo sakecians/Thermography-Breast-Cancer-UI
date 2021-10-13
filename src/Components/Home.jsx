@@ -1,7 +1,7 @@
 import { Button, Grid, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import React, {useEffect, useState} from 'react';
-import './Home.scss';
+import './Home.css';
 import Navbar from './Navbar';
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
