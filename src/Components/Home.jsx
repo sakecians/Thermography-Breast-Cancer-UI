@@ -118,7 +118,15 @@ export default function Home() {
         <Box pt={2} pr={8}>
           <Navbar />
         </Box>
-        <Box m={8} mt={12} style={{ width: "300px" }}>
+        <Box
+          m={8}
+          mt={12}
+          style={{
+            width: "500px",
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "11rem",
+          }}>
           <Grid container direction='column' spacing={3}>
             <Grid item>
               <Typography
@@ -144,9 +152,8 @@ export default function Home() {
                   deleteSpeed={50}
                   delaySpeed={1000}
                 />
+                {"\n"}
               </Typography>
-            </Grid>
-            <Grid item>
               <Typography
                 style={{
                   fontFamily: "Montserrat, sans-serif",
@@ -176,6 +183,7 @@ export default function Home() {
             </Grid>
             <Grid item>
               <Button
+                size='large'
                 style={{
                   fontFamily: "Lato, sans-serif",
                   backgroundColor: "#333",
@@ -192,6 +200,7 @@ export default function Home() {
           aria-labelledby='customized-dialog-title'
           open={open}>
           <BootstrapDialogTitle
+            style={{ backgroundColor: "#E15E82", color: '#fbfbfb' }}
             id='customized-dialog-title'
             onClose={handleClose}>
             Thermography of breast anomaly
@@ -230,7 +239,7 @@ export default function Home() {
             ) : undefined}
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={onClickPop}>
+            <Button style={{color: '#333333', borderColor: '#333333'}} variant="outlined" autoFocus onClick={onClickPop}>
               Predict
             </Button>
             <Popover
