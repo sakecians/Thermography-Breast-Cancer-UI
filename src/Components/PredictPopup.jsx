@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -14,6 +14,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import { Button, Grid, Typography, Box } from "@mui/material";
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -54,10 +56,59 @@ BootstrapDialogTitle.propTypes = {
 };
 
 export default function PredictPopup(props) {
-    const [selectedFile, setSelectedFile] = useState();
-    const [preview, setPreview] = useState();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [prediction, setPrediction] = useState(undefined);
+
+    const [upImg, setUpImg] = useState();
+    const imgRef = useRef(null);
+    const previewCanvasRef = useRef(null);
+    const [crop, setCrop] = useState({ unit: "%", width: 30, aspect: 16 / 9 });
+    const [completedCrop, setCompletedCrop] = useState(null);
+
+    const onSelectFile = (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => setUpImg(reader.result));
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    };
+
+    const onLoad = useCallback((img) => {
+      imgRef.current = img;
+    }, []);
+
+    useEffect(() => {
+      if (!completedCrop || !previewCanvasRef.current || !imgRef.current) {
+        return;
+      }
+
+      const image = imgRef.current;
+      const canvas = previewCanvasRef.current;
+      const crop = completedCrop;
+
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
+      const ctx = canvas.getContext("2d");
+      const pixelRatio = window.devicePixelRatio;
+
+      canvas.width = crop.width * pixelRatio * scaleX;
+      canvas.height = crop.height * pixelRatio * scaleY;
+
+      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      ctx.imageSmoothingQuality = "high";
+
+      ctx.drawImage(
+        image,
+        crop.x * scaleX,
+        crop.y * scaleY,
+        crop.width * scaleX,
+        crop.height * scaleY,
+        0,
+        0,
+        crop.width * scaleX,
+        crop.height * scaleY
+      );
+    }, [completedCrop]);
 
     const onClickPop = (event) => {
       setAnchorEl(event.currentTarget);
@@ -68,7 +119,7 @@ export default function PredictPopup(props) {
     };
 
     const handlePredictions = () => {
-      if (preview) {
+      if (upImg) {
         setPrediction(() => "It's normal don't worry :)");
       } else {
         setPrediction(() => "Please upload an image first");
@@ -78,33 +129,12 @@ export default function PredictPopup(props) {
     const openPop = Boolean(anchorEl);
     const id = openPop ? "simple-popover" : undefined;
 
-    // create a preview as a side effect, whenever selected file is changed
-    useEffect(() => {
-      if (!selectedFile) {
-        setPreview(undefined);
-        return;
-      }
-
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-
-      // free memory when ever this component is unmounted
-      return () => URL.revokeObjectURL(objectUrl);
-    }, [selectedFile]);
-
-    const onSelectFile = (e) => {
-      if (!e.target.files || e.target.files.length === 0) {
-        setSelectedFile(undefined);
-        return;
-      }
-
-      // I've kept this example simple by using the first image instead of multiple
-      setSelectedFile(e.target.files[0]);
-    };
     return (
       <BootstrapDialog
         onClose={props.handleClose}
         aria-labelledby='customized-dialog-title'
+        fullWidth
+        maxWidth='lg'
         open={props.open}>
         <BootstrapDialogTitle
           style={{ backgroundColor: "#E15E82", color: "#fbfbfb" }}
@@ -114,12 +144,29 @@ export default function PredictPopup(props) {
         </BootstrapDialogTitle>
         <DialogContent dividers>
           <Grid container justifyContent='center'>
-            {selectedFile ? (
-              <img
-                style={{ width: "500px", height: "auto" }}
-                alt='img-upload'
-                src={preview}
-              />
+            {upImg ? (
+              <>
+                <Grid item md={6}>
+                  <ReactCrop
+                    style={{ width: "100%", height: "auto" }}
+                    src={upImg}
+                    onImageLoaded={onLoad}
+                    crop={crop}
+                    onChange={(c) => setCrop(c)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                  />
+                </Grid>
+                <Grid item md={6} container justifyContent='center'>
+                  <canvas
+                    ref={previewCanvasRef}
+                    // Rounding is important so the canvas width and height matches/is a multiple for sharpness.
+                    style={{
+                      width: Math.round(completedCrop?.width ?? 0),
+                      height: Math.round(completedCrop?.height ?? 0),
+                    }}
+                  />
+                </Grid>
+              </>
             ) : (
               <img
                 style={{ width: "500px", height: "auto" }}
@@ -166,18 +213,12 @@ export default function PredictPopup(props) {
               <List>
                 <ListItem disablePadding>
                   <ListItemButton>
-                    <ListItemText
-                      onClick={handlePredictions}
-                      primary='CNN'
-                    />
+                    <ListItemText onClick={handlePredictions} primary='CNN' />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton component='a' href='#simple-list'>
-                    <ListItemText
-                      onClick={handlePredictions}
-                      primary='SVM'
-                    />
+                    <ListItemText onClick={handlePredictions} primary='SVM' />
                   </ListItemButton>
                 </ListItem>
               </List>
