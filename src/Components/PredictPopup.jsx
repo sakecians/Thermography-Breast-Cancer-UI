@@ -162,8 +162,8 @@ export default function PredictPopup(props) {
                     alt='thermo'
                     src={result}
                     style={{
-                      width: Math.round(completedCrop?.width ?? 0),
-                      height: Math.round(completedCrop?.height ?? 0),
+                      width: "430px",
+                      height: "auto",
                     }}
                   />
                 </ColorExtractor>
@@ -201,8 +201,9 @@ export default function PredictPopup(props) {
                   key={id}
                   style={{
                     backgroundColor: color,
-                    width: 100,
-                    height: 100,
+                    width: 50,
+                    height: 50,
+                    margin: "1px",
                   }}
                 />
               );
